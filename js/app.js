@@ -1,10 +1,7 @@
-// @TODO: YOUR CODE HERE!
-
-// Graph specifics
-var graphwidth = parseInt(d3.select("#scatter").style("width"));
-var graphheight = width - width / 3.9;
-var graphmargin = 20;
-var graphlabelArea = 110;
+var width = parseInt(d3.select("#scatter").style("width"));
+var height = width - width / 3.9;
+var margin = 20;
+var labelArea = 110;
 
 var tPadBot = 40;
 var tPadLeft = 40;
@@ -125,7 +122,7 @@ d3.csv("data/data.csv").then(function(data) {
 function visualize(theData) {
 
   var curY = "obesity";
-
+  var curX = "poverty";
   var xMin;
   var xMax;
   var yMin;
@@ -300,3 +297,61 @@ function visualize(theData) {
       // Remove highlight
       d3.select("." + d.abbr).style("stroke", "#e3e3e3");
     });
+  }
+  d3.selectAll(".aText").on("click", function() {
+    var self = d3.select(this);
+    if (self.classed("inactive")) {
+      var axis = self.attr("data-axis");
+      var name = self.attr("data-name");
+      if (axis === "x") {
+        curX = name;
+        xMinMax();
+        xScale.domain([xMin, xMax]);
+        svg.select(".xAxis").transition().duration(300).call(xAxis);
+        d3.selectAll("circle").each(function() {
+          d3
+            .select(this)
+            .transition()
+            .attr("cx", function(d) {
+              return xScale(d[curX]);
+            })
+            .duration(300);
+        });
+        d3.selectAll(".stateText").each(function() {
+          d3
+            .select(this)
+            .transition()
+            .attr("dx", function(d) {
+              return xScale(d[curX]);
+            })
+            .duration(300);
+        });
+        labelChange(axis, self);
+      }
+      else {
+        curY = name;
+        yMinMax();
+        yScale.domain([yMin, yMax]);
+        svg.select(".yAxis").transition().duration(300).call(yAxis);
+        d3.selectAll("circle").each(function() {
+          d3
+            .select(this)
+            .transition()
+            .attr("cy", function(d) {
+              return yScale(d[curY]);
+            })
+            .duration(300);
+        });
+        d3.selectAll(".stateText").each(function() {
+          d3
+            .select(this)
+            .transition()
+            .attr("dy", function(d) {
+              return yScale(d[curY]) + circRadius / 3;
+            })
+            .duration(300);
+        });
+        labelChange(axis, self);
+      }
+    }
+  });
